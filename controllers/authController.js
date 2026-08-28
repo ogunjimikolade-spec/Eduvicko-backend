@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 
 console.log('bcrypt loaded:', typeof bcrypt.hash); // <-- ADD THIS LINE
 
-exports.register = async (req, res) => {
+exports.register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
@@ -13,7 +13,7 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({ name, email, password });
+    const user = await User.create({ name, email, password: hashedPassword });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
