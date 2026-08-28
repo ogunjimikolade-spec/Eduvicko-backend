@@ -6,18 +6,18 @@ console.log('bcrypt loaded:', typeof bcrypt.hash); // <-- ADD THIS LINE
 
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: 'User already exists' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({ name, email, password: hashedPassword });
+    const user = await User.create({ name, email, password: hashedPassword , role });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
-    res.status(201).json({ _id: user._id, name: user.name, email: user.email, token });
+    res.status(201).json({ _id: user._id, name: user.name, email: user.email, role: user.role, token });
     
   } catch (error) {
     console.log('FULL ERROR:', error);
