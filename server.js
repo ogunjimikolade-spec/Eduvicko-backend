@@ -8,10 +8,11 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-  origin: ["http://localhost:5173", "https://eduvicko-frontend.vercel.app"],
+  origin: ["http://localhost:5173", "https://edu-vicko-frontend.vercel.app"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTION"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  
 }));
 
 // Routes
