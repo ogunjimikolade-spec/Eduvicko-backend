@@ -2,7 +2,7 @@ console.log("SERVER RESTARTED - NO NEXT CODE V2")
   const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const cookieParse = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 
