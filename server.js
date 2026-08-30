@@ -2,10 +2,13 @@ console.log("SERVER RESTARTED - NO NEXT CODE V2")
   const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const cookieParse = require('cookie-parser')
 require('dotenv').config();
+
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser())
 
 app.use(cors({
   origin: ["http://localhost:5173", "https://edu-vicko-frontend.vercel.app"],

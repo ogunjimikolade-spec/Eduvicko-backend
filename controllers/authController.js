@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
+const cookie = require('cookie')
 // @desc   Register Admin
 // @route  POST /api/auth/register
 const register = async (req, res) => {
@@ -62,10 +62,14 @@ const login = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '1d' }
+      { expiresIn: '7d' }
     );
-
-    res.json({
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'None',
+      maxAge: 7 * 24 * 60 * 1000
+    }).status(200).json({
       message: 'Login successful',
       token,
       user: { id: user._id, name: user.name, email: user.email, role: user.role }
