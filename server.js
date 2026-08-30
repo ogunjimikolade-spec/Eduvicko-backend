@@ -9,7 +9,9 @@ app.use(express.json());
 
 app.use(cors({
   origin: ["http://localhost:5173", "https://eduvicko-frontend.vercel.app"],
-  credentials: true
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTION"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 // Routes
