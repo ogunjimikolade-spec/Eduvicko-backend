@@ -1,74 +1,79 @@
-const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
-exports.register = async (req, res) => {
+// @desc   Register Admin
+// @route  POST /api/auth/register
+const register = async (req, res) => {
   try {
-    console.log("NEW REGISTER CODE RUNNING"); // test if new code dey run
-    
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
-    if(!name || !email || !password) {
-      return res.status(400).json({ message: 'Please fill all fields' });
-    }
-
+    // 1. Check if user exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    // 2. Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({ 
-      name, 
-      email, 
-      password: hashedPassword, 
-      role: role || 'user' 
+    // 3. Create user with role admin
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: 'admin'
     });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
-
-    res.status(201).json({ 
-      _id: user._id, 
-      name: user.name, 
-      email: user.email,
-      role: user.role,
-      token 
+    res.status(201).json({
+      message: 'Admin registered successfully',
+      user: { id: user._id, name: user.name, email: user.email, role: user.role }
     });
 
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-exports.login = async (req, res) => {
+// @desc   Login Admin
+// @route  POST /api/auth/login
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
+    // 1. Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password); // <- THIS LINE
-    console.log("Password match", isMatch)
+    // 2. Check if role is admin
+    if (user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied. Not an admin' });
+    }
+
+    // 3. Check password
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d'
-    });
+    // 4. Generate JWT
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
 
     res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      token
+      message: 'Login successful',
+      token,
+      user: { id: user._id, name: user.name, email: user.email, role: user.role }
     });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
+module.exports = { register, login };
